@@ -226,7 +226,6 @@ function handleKeyPress(numRotations) {
   if (noMovesLeft(mergedBoard)) {
     setCanvas(mergedBoard);
     setTimeout(() => {
-      score = gameBoard.reduce();
       gameBoard = createBoard(4);
       alert("Game Over");
       setCanvas(gameBoard);
