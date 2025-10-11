@@ -23,12 +23,17 @@ function setCanvas(board) {
     htmlString += "<tr>";
     for (let col = 0; col < board[row].length; col++) {
       const value = board[row][col];
-      const tileColor = colors[value] || colors[4096]; // fallback for big numbers
+      const tileColor = colors[value] || colors[4096]; // fallback
+
+      // Add animation classes
+      let animationClass = "";
+      if (value === 2 || value === 4) animationClass = "animate-pop"; // new tiles
+      if (value >= 8) animationClass = "animate-flash"; // merged tiles
 
       htmlString += `
         <td>
           <div 
-            class="font-bold text-xl rounded-lg flex items-center justify-center size-16 shadow-inner"
+            class="font-bold text-xl rounded-lg flex items-center justify-center size-16 shadow-inner ${animationClass}"
             style="background-color: ${tileColor.background}; color: ${
         tileColor.color
       };"
