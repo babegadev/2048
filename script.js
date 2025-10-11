@@ -35,7 +35,7 @@ function setCanvas(board) {
 }
 
 function createBoard(size) {
-  let board = [];
+  const board = [];
   for (let i = 0; i < size; i++) {
     board[i] = [];
     for (let j = 0; j < size; j++) {
@@ -50,10 +50,11 @@ function sizeOfBoard(board) {
 }
 
 function getEmptyPositionsForBoard(board) {
+  const boardCopy = snapshotBoard(board);
   const emptyPositions = [];
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board.length; j++) {
-      if (board[i][j] == 0) {
+  for (let i = 0; i < boardCopy.length; i++) {
+    for (let j = 0; j < boardCopy.length; j++) {
+      if (boardCopy[i][j] == 0) {
         emptyPositions.push([i, j]);
       }
     }
@@ -70,33 +71,38 @@ function rotatedColFor(row, col, size) {
 }
 
 function addToBoard(board) {
-  emptyPositions = getEmptyPositionsForBoard(board);
+  const boardCopy = snapshotBoard(board);
+  const emptyPositions = getEmptyPositionsForBoard(board);
 
-  randomPosition =
-    emptyPositions[Math.floor(Math.random() * (emptyPositions.length + 1))];
+  if (emptyPositions.length == 0) return boardCopy;
 
-  randomNumber = [2, 2, 2, 4][Math.floor(Math.random() * 4)];
+  const randomPosition =
+    emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
 
-  board[randomPosition[0]][randomPosition[1]] = randomNumber;
+  const randomNumber = [2, 2, 2, 4][Math.floor(Math.random() * 4)];
 
-  return board;
+  boardCopy[randomPosition[0]][randomPosition[1]] = randomNumber;
+
+  return boardCopy;
 }
 
 function rotateBoardClockwise(board) {
+  const boardCopy = snapshotBoard(board);
   const rotatedBoard = createBoard(board.length);
-  for (let row = 0; row < board.length; row++) {
-    for (let col = 0; col < board.length; col++) {
+  for (let row = 0; row < boardCopy.length; row++) {
+    for (let col = 0; col < boardCopy.length; col++) {
       const rotatedRow = rotatedRowFor(row, col, board.length);
       const rotatedCol = rotatedColFor(row, col, board.length);
-      rotatedBoard[rotatedRow][rotatedCol] = board[row][col];
+      rotatedBoard[rotatedRow][rotatedCol] = boardCopy[row][col];
     }
   }
   return rotatedBoard;
 }
 
 function moveUp(column) {
-  const originalLength = column.length;
-  const movedColumn = column.filter((item) => item != 0);
+  const columnSnapshot = [...column];
+  const originalLength = columnSnapshot.length;
+  const movedColumn = columnSnapshot.filter((item) => item != 0);
 
   for (let i = movedColumn.length; i < originalLength; i++) {
     movedColumn[i] = 0;
@@ -106,46 +112,49 @@ function moveUp(column) {
 }
 
 function joinUp(col) {
-  for (let i = 0; i < col.length - 1; i++) {
-    if (col[i] == col[i + 1]) {
-      col[i] *= 2;
-      col[i + 1] = 0;
+  const colSnapshot = [...col];
+  const length = colSnapshot.length;
+  for (let i = 0; i < length - 1; i++) {
+    if (colSnapshot[i] == colSnapshot[i + 1]) {
+      colSnapshot[i] *= 2;
+      colSnapshot[i + 1] = 0;
       i++;
     }
   }
-  return col;
+  return colSnapshot;
 }
 
 function mergeUpColumn(board, target_col) {
-  const col = board.map((row) => row[target_col]);
-
+  const boardCopy = snapshotBoard(board);
+  const col = boardCopy.map((row) => row[target_col]);
   const mergedCol = moveUp(joinUp(moveUp(col)));
 
-  for (let i = 0; i < board.length; i++) {
-    board[i][target_col] = mergedCol[i];
+  for (let i = 0; i < boardCopy.length; i++) {
+    boardCopy[i][target_col] = mergedCol[i];
   }
 
-  return board;
+  return boardCopy;
 }
 
 function mergeUp(board) {
-  let newBoard = [...board];
+  let boardCopy = snapshotBoard(board);
 
-  for (let col = 0; col < newBoard.length; col++) {
-    newBoard = mergeUpColumn(newBoard, col);
+  for (let col = 0; col < boardCopy.length; col++) {
+    boardCopy = mergeUpColumn(boardCopy, col);
   }
 
-  return newBoard;
+  return boardCopy;
 }
 
 function noMovesLeft(board) {
-  let rotatedBoard = board;
-  if (getEmptyPositionsForBoard(board).length == 0) {
+  let rotatedBoard = snapshotBoard(board);
+
+  if (getEmptyPositionsForBoard(rotatedBoard).length == 0) {
     let cantMergeCount = 0;
 
     for (let i = 0; i < 4; i++) {
       rotatedBoard = rotateBoardClockwise(rotatedBoard);
-      if (rotatedBoard == mergeUp(rotatedBoard)) {
+      if (boardIsEqual(rotatedBoard, mergeUp(rotatedBoard))) {
         cantMergeCount++;
       }
     }
@@ -178,12 +187,25 @@ function boardIsEqual(board1, board2) {
   return true;
 }
 
-let gameBoard = [
-  [2, 0, 0, 0],
-  [2, 2, 0, 0],
-  [0, 2, 0, 0],
-  [0, 0, 0, 0],
-];
+function mergeToDirection(board, numRotations) {
+  let boardCopy = snapshotBoard(board);
+
+  for (let i = 0; i < numRotations; i++) {
+    boardCopy = rotateBoardClockwise(boardCopy);
+  }
+
+  boardCopy = mergeUp(boardCopy);
+
+  for (let i = 0; i < 4 - numRotations; i++) {
+    boardCopy = rotateBoardClockwise(boardCopy);
+  }
+
+  return snapshotBoard(boardCopy);
+}
+
+let gameBoard = createBoard(4);
+gameBoard = addToBoard(gameBoard);
+gameBoard = addToBoard(gameBoard);
 
 setCanvas(gameBoard);
 
@@ -191,27 +213,26 @@ let gameOver = false;
 
 function handleKeyPress(numRotations) {
   const initialState = snapshotBoard(gameBoard);
-  const size = gameBoard.length;
 
-  for (let i = 0; i < numRotations; i++) {
-    gameBoard = rotateBoardClockwise(gameBoard);
+  let mergedBoard = mergeToDirection(gameBoard, numRotations);
+
+  if (!boardIsEqual(mergedBoard, initialState)) {
+    // console.log("ADD");
+    mergedBoard = addToBoard(mergedBoard);
   }
 
-  gameBoard = mergeUp(gameBoard);
+  setCanvas(mergedBoard);
 
-  for (let i = 0; i < size - numRotations; i++) {
-    gameBoard = rotateBoardClockwise(gameBoard);
+  if (noMovesLeft(mergedBoard)) {
+    setCanvas(mergedBoard);
+    setTimeout(() => {
+      gameBoard = createBoard(4);
+      alert("Game Over");
+      setCanvas(gameBoard);
+    }, 50);
   }
 
-  console.log("initial", initialState);
-  console.log("current", gameBoard);
-
-  if (!boardIsEqual(gameBoard, initialState)) {
-    console.log("ADD");
-    gameBoard = addToBoard(gameBoard);
-  }
-
-  setCanvas(gameBoard);
+  gameBoard = snapshotBoard(mergedBoard);
 }
 
 document.addEventListener("keydown", function (event) {
