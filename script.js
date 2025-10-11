@@ -226,6 +226,7 @@ function handleKeyPress(numRotations) {
   if (noMovesLeft(mergedBoard)) {
     setCanvas(mergedBoard);
     setTimeout(() => {
+      score = gameBoard.reduce();
       gameBoard = createBoard(4);
       alert("Game Over");
       setCanvas(gameBoard);
@@ -258,3 +259,46 @@ document.addEventListener("keydown", function (event) {
       break;
   }
 });
+
+var touchstartX = 0;
+var touchstartY = 0;
+var touchendX = 0;
+var touchendY = 0;
+
+body = document.querySelector("body");
+
+body.addEventListener(
+  "touchstart",
+  function (event) {
+    touchstartX = event.screenX;
+    touchstartY = event.screenY;
+  },
+  false
+);
+
+body.addEventListener(
+  "touchend",
+  function (event) {
+    touchendX = event.screenX;
+    touchendY = event.screenY;
+    handleGesure();
+  },
+  false
+);
+
+function handleGesure() {
+  if (touchendX < touchstartX) {
+    handleKeyPress(1);
+  }
+  if (touchendX > touchstartX) {
+    handleKeyPress(3);
+  }
+  if (touchendY < touchstartY) {
+    handleKeyPress(2);
+  }
+  if (touchendY > touchstartY) {
+    handleKeyPress(0);
+  }
+  if (touchendY == touchstartY) {
+  }
+}
