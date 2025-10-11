@@ -3,30 +3,39 @@ const canvas = document.querySelector("#canvas");
 function setCanvas(board) {
   let htmlString = ``;
 
-  colors = [
-    "#CCC0B3", // pixel 0
-    "#EEE4DA", // pixel 2
-    "#EEE4DA", // pixel 4
-    "#F2B179", // pixel 8
-    "#F59563", // pixel 16
-    "#F2B179", // pixel 32
-    "#F2B179", // pixel 64
-    "#EDCF72", // pixel 128
-    "#F2B179", // pixel 256
-    "#F2B179", // pixel 512
-    "#F2B179", // pixel 1024
-    "#F2B179", // pixel 2048
-    "#3E3933", // pixel 4096
-  ];
+  const colors = {
+    0: { background: "#CCC0B3", color: "#776E65" },
+    2: { background: "#EEE4DA", color: "#776E65" },
+    4: { background: "#EDE0C8", color: "#776E65" },
+    8: { background: "#F2B179", color: "#F9F6F2" },
+    16: { background: "#F59563", color: "#F9F6F2" },
+    32: { background: "#F67C5F", color: "#F9F6F2" },
+    64: { background: "#F65E3B", color: "#F9F6F2" },
+    128: { background: "#EDCF72", color: "#F9F6F2" },
+    256: { background: "#EDCC61", color: "#F9F6F2" },
+    512: { background: "#EDC850", color: "#F9F6F2" },
+    1024: { background: "#EDC53F", color: "#F9F6F2" },
+    2048: { background: "#EDC22E", color: "#F9F6F2" },
+    4096: { background: "#3E3933", color: "#F9F6F2" },
+  };
 
   for (let row = 0; row < board.length; row++) {
     htmlString += "<tr>";
-    for (let col = 0; col < board.length; col++) {
+    for (let col = 0; col < board[row].length; col++) {
       const value = board[row][col];
-      const colorIndex = value == 0 ? 0 : Math.log2(value);
-      htmlString += `<td><div class='font-bold m-1 size-16 flex items-center justify-center bg-[${colors[colorIndex]}]'>`;
-      htmlString += value == 0 ? "" : value;
-      htmlString += "</div></td>";
+      const tileColor = colors[value] || colors[4096]; // fallback for big numbers
+
+      htmlString += `
+        <td>
+          <div 
+            class="font-bold text-xl rounded-lg flex items-center justify-center size-16 shadow-inner"
+            style="background-color: ${tileColor.background}; color: ${
+        tileColor.color
+      };"
+          >
+            ${value === 0 ? "" : value}
+          </div>
+        </td>`;
     }
     htmlString += "</tr>";
   }
