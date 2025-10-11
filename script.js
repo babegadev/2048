@@ -260,45 +260,38 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-var touchstartX = 0;
-var touchstartY = 0;
-var touchendX = 0;
-var touchendY = 0;
+const swipeElement = document;
+let touchStartX = 0;
+let touchStartY = 0;
+const threshold = 50; // Minimum pixel distance for a swipe
 
-body = document.querySelector("body");
+swipeElement.addEventListener("touchstart", (event) => {
+  touchStartX = event.changedTouches[0].screenX;
+  touchStartY = event.changedTouches[0].screenY;
+});
 
-body.addEventListener(
-  "touchstart",
-  function (event) {
-    touchstartX = event.screenX;
-    touchstartY = event.screenY;
-  },
-  false
-);
+swipeElement.addEventListener("touchend", (event) => {
+  const touchEndX = event.changedTouches[0].screenX;
+  const touchEndY = event.changedTouches[0].screenY;
 
-body.addEventListener(
-  "touchend",
-  function (event) {
-    touchendX = event.screenX;
-    touchendY = event.screenY;
-    handleGesure();
-  },
-  false
-);
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
 
-function handleGesure() {
-  if (touchendX < touchstartX) {
-    handleKeyPress(1);
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+    if (deltaX > 0) {
+      console.log("Swipe Right");
+      handleKeyPress(3);
+    } else {
+      console.log("Swipe Left");
+      handleKeyPress(1);
+    }
+  } else if (Math.abs(deltaY) > threshold) {
+    if (deltaY > 0) {
+      console.log("Swipe Down");
+      handleKeyPress(2);
+    } else {
+      console.log("Swipe Up");
+      handleKeyPress(0);
+    }
   }
-  if (touchendX > touchstartX) {
-    handleKeyPress(3);
-  }
-  if (touchendY < touchstartY) {
-    handleKeyPress(2);
-  }
-  if (touchendY > touchstartY) {
-    handleKeyPress(0);
-  }
-  if (touchendY == touchstartY) {
-  }
-}
+});
