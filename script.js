@@ -241,6 +241,8 @@ function handleKeyPress(numRotations) {
     setCanvas(mergedBoard);
     setTimeout(() => {
       gameBoard = createBoard(4);
+      gameBoard = addToBoard(gameBoard);
+      gameBoard = addToBoard(gameBoard);
       alert("Game Over");
       setCanvas(gameBoard);
     }, 50);
