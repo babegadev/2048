@@ -1,4 +1,5 @@
 const canvas = document.querySelector("#canvas");
+const scoreDisplay = document.querySelector("#score-display");
 
 function setCanvas(board) {
   let htmlString = ``;
@@ -46,6 +47,7 @@ function setCanvas(board) {
   }
 
   canvas.innerHTML = htmlString;
+  scoreDisplay.innerHTML = score;
 }
 
 function createBoard(size) {
@@ -132,6 +134,7 @@ function joinUp(col) {
     if (colSnapshot[i] == colSnapshot[i + 1]) {
       colSnapshot[i] *= 2;
       colSnapshot[i + 1] = 0;
+      score += colSnapshot[i];
       i++;
     }
   }
@@ -217,6 +220,7 @@ function mergeToDirection(board, numRotations) {
   return snapshotBoard(boardCopy);
 }
 
+let score = 0;
 let gameBoard = createBoard(4);
 gameBoard = addToBoard(gameBoard);
 gameBoard = addToBoard(gameBoard);
@@ -240,10 +244,11 @@ function handleKeyPress(numRotations) {
   if (noMovesLeft(mergedBoard)) {
     setCanvas(mergedBoard);
     setTimeout(() => {
+      alert("Game Over. Score: " + score);
       gameBoard = createBoard(4);
       gameBoard = addToBoard(gameBoard);
       gameBoard = addToBoard(gameBoard);
-      alert("Game Over");
+      score = 0;
       setCanvas(gameBoard);
     }, 50);
   }
